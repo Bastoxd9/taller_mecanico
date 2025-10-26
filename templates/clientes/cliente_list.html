@@ -1,0 +1,84 @@
+{% extends "base.html" %} {% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Clientes</h2>
+    <a href="{% url 'clientes:create' %}" class="btn btn-primary"
+      >Nuevo cliente</a
+    >
+  </div>
+
+  <!-- Search input -->
+  <div class="mb-3">
+    <input
+      id="search-input"
+      type="search"
+      class="form-control"
+      placeholder="Buscar clientes por nombre..."
+      value="{{ query|default:'' }}"
+      aria-label="Buscar clientes"
+    />
+  </div>
+
+  <div id="search-feedback" class="mb-2" style="display: none">
+    Resultados para: <strong id="search-query"></strong>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>RUT</th>
+          <th>Teléfono</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="results-body">
+        {% for cliente in clientes %}
+        <tr>
+          <td>{{ cliente.nombre }}</td>
+          <td>{{ cliente.rut }}</td>
+          <td>{{ cliente.telefono }}</td>
+          <td>
+            <a
+              href="{% url 'clientes:update' cliente.pk %}"
+              class="btn btn-sm btn-outline-secondary"
+              >Editar</a
+            >
+            <a
+              href="{% url 'clientes:delete' cliente.pk %}"
+              class="btn btn-sm btn-outline-danger"
+              >Borrar</a
+            >
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="4">No hay clientes registrados.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{# Cargar módulos JavaScript externos #} {% load static %}
+<script src="{% static 'js/search_base.js' %}"></script>
+<script src="{% static 'js/cliente_search.js' %}"></script>
+<script>
+  // Inicializar la búsqueda cuando el DOM esté listo
+  document.addEventListener("DOMContentLoaded", function () {
+    new ClienteSearch({
+      apiUrl: "{% url 'clientes:api_buscar' %}",
+      inputId: "search-input",
+      resultsBodyId: "results-body",
+      feedbackId: "search-feedback",
+      querySpanId: "search-query",
+      debounceDelay: 300,
+      editUrlPattern: "/clientes/{id}/editar/",
+      deleteUrlPattern: "/clientes/{id}/borrar/",
+    });
+  });
+</script>
+
+{% endblock %}
